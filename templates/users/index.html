@@ -1,0 +1,48 @@
+<h2>所有使用者</h2>
+
+<h3>使用者列表</h3>
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>名稱</th>
+            <th>email</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+                <a href="/users/{{ user.id }}">查看</a>
+                <a href="/users/{{ user.id }}/edit">編輯</a>
+                <form action="/users/{{ user.id }}/delete" method="POST">
+                    <button type="submit" onclick="return confirm('確定要刪除嗎？')">刪除</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>新增使用者</h3>
+<form action="/users" method="POST">
+    <div>
+        <label>名稱</label>
+        <input type="text" name="name" required>
+    </div>
+    <div>
+        <label for="">密碼</label>
+        <input type="password" name="password" required>
+    </div>
+    <div>
+        <label for="">電子郵件</label>
+        <input type="email" name="email" required>
+    </div>
+    <button type="submit">新增</button>
+    <br>
+    <a href="/projects">專案管理頁面</a>
+</form>

@@ -1,0 +1,13 @@
+<h2>編輯頁面</h2>
+<form action="/users/{{ user.id }}/update" method="POST">
+    <div>
+        <label>名稱：</label>
+        <input type="text" name="name" value="{{ user.name }}" required>
+    </div>
+    <div>
+        <label>電子郵件：</label>
+        <input type="email" name="email" value="{{user.email}}" required>
+    </div>
+    <button type="submit">更新</button>
+</form>
+<a href="/users">回首頁</a>
