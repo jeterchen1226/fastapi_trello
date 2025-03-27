@@ -7,7 +7,7 @@ class Project(Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String, nullable=False)
-    description = Column(Text, nullable=False)
+    description = Column(Text, nullable=True)
     start_date = Column(DateTime)
     end_date = Column(DateTime)
 

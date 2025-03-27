@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, Query
+from fastapi import Depends, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from database.db import Base, engine
@@ -7,9 +7,13 @@ from pydantic import BaseModel, Field
 from utils.get_db import get_db
 from app import app
 from app.users.views import user as user_route
+from app.projects.views import project as project_route
 from models.user import User
+from models.project import Project
+from models.user_project import UserProject
 
 app.include_router(user_route, prefix="/users")
+app.include_router(project_route, prefix="/projects")
 
 @app.get("/")
 def index():
