@@ -1,0 +1,13 @@
+<h2>編輯專案頁面</h2>
+<form action="/projects/{{ projects.name }}/update" method="POST">
+    <div>
+        <label>名稱：</label>
+        <input type="text" name="name" value="{{ projects.name }}" required>
+    </div>
+    <div>
+        <label>描述：</label>
+        <input type="text" name="description" value="{{ projects.description }}">
+    </div>
+    <button type="submit">更新</button>
+</form>
+<a href="/projects">回首頁</a>

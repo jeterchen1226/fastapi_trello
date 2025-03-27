@@ -1,0 +1,36 @@
+<h2>所有專案</h2>
+
+<h3>專案列表</h3>
+<table border="1">
+    <thead>
+        <tr>
+            <th>名稱</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for project in projects %}
+        <tr>
+            <td>{{ project.name }}</td>
+            <td>
+                <a href="/projects/{{ project.name }}">查看</a>
+                <a href="/projects/{{ project.name }}/edit">編輯</a>
+                <form action="/projects/{{ project.name }}/delete" method="POST">
+                    <button type="submit" onclick="return confirm('確定要刪除嗎？')">刪除</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>新增專案</h3>
+<form action="/projects" method="POST">
+    <div>
+        <label>名稱</label>
+        <input type="text" name="name" required>
+    </div>
+    <button type="submit">新增</button>
+    <br>
+    <a href="/projects">專案管理頁面</a>
+</form>
