@@ -8,12 +8,15 @@ from utils.get_db import get_db
 from app import app
 from app.users.views import user as user_route
 from app.projects.views import project as project_route
+from app.lanes.views import lane as lane_routes
 from models.user import User
 from models.project import Project
 from models.user_project import UserProject
+from models.lane import Lane
 
 app.include_router(user_route, prefix="/users")
 app.include_router(project_route, prefix="/projects")
+app.include_router(lane_routes, prefix="/lanes")
 
 @app.get("/")
 def index():

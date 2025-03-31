@@ -14,6 +14,7 @@ from database.db import Base, DATABASE_URL
 from models.user import User
 from models.project import Project
 from models.user_project import UserProject
+from models.lane import Lane
 
 
 # this is the Alembic Config object, which provides

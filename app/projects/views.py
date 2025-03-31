@@ -1,17 +1,18 @@
 from fastapi import APIRouter, Depends, Request, Form, HTTPException, status
 from app import templates
 from fastapi.responses import RedirectResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from utils.get_db import get_db
 from models.project import Project
-from typing import Annotated
+from models.lane import Lane
+from typing import Annotated, Optional
 from schemas.project import ProjectCreate, ProjectUpdate
 
 project = APIRouter()
 
 @project.get("/")
 def index(request: Request, db: Session = Depends(get_db)):
-    projects = db.query(Project).all()
+    projects = db.query(Project).order_by(Project.name.desc()).all()
     return templates.TemplateResponse("projects/index.html", {"request": request, "projects": projects})
 
 @project.post("/")
@@ -24,15 +25,14 @@ def create(request: Request, name: Annotated[str, Form()], db: Session = Depends
     db.add(new_projects)
     db.commit()
     db.refresh(new_projects)
-    projects = db.query(Project).all()
-    return templates.TemplateResponse("projects/index.html", {"request": request, "projects": projects})
+    return RedirectResponse(url="/projects", status_code=status.HTTP_302_FOUND)
 
 @project.get("/new")
 def new(request: Request):
     return templates.TemplateResponse("projects/index.html", {"request": request})
 
 @project.post("/{project_name}/update")
-def update(project_name: str, name: Annotated[str, Form()], description: Annotated[str, Form()], db: Session = Depends(get_db)):
+def update(project_name: str, name: Annotated[str, Form()], description: Annotated[Optional[str], Form()] = None, db: Session = Depends(get_db)):
     update_data = ProjectUpdate(name = name, description = description)
     projects = db.query(Project).filter(Project.name == project_name).first()
     if not projects:
@@ -49,10 +49,10 @@ def update(project_name: str, name: Annotated[str, Form()], description: Annotat
 @project.get("/{project_name}")
 def show(request: Request, project_name: str, db: Session = Depends(get_db)):
     projects = db.query(Project).filter(Project.name == project_name).first()
-    if projects:
-        return templates.TemplateResponse("projects/show.html", {"request": request, "projects": projects})
-    else:
+    if not projects:
         raise HTTPException(status_code=404, detail="查無專案。")
+    lanes = db.query(Lane).filter(Lane.project_id == projects.id).all()
+    return templates.TemplateResponse("projects/show.html", {"request": request, "projects": projects, "lanes": lanes})
 
 @project.get("/{project_name}/edit")
 def edit(request: Request, project_name: str, db: Session = Depends(get_db)):

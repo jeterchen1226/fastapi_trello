@@ -1,0 +1,16 @@
+<h2>泳道詳細資訊</h2>
+<div>
+    <p>泳道名稱：{{ lanes.name }}</p>
+    {% if lanes.project %}
+    <p>所屬專案：{{ lanes.project.name }}</p>
+    {% else %}
+    <p>所屬專案：無</p>
+    {% endif %}
+</div>
+
+<div>
+    <a href="/lanes/{{ lanes.id }}/edit">編輯</a>
+    <form action="/lanes/{{ lanes.id }}/delete" method="POST" style="display:inline;">
+        <button type="submit" onclick="return confirm('確定要刪除嗎？')">刪除</button>
+    </form>
+</div>
