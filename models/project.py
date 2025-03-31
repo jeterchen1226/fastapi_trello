@@ -12,6 +12,7 @@ class Project(Base):
     end_date = Column(DateTime)
 
     user_associations = relationship("UserProject", back_populates="project")
+    lanes = relationship("Lane", back_populates="project")
 
     @property
     def users(self):

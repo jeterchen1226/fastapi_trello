@@ -11,7 +11,9 @@
     <tbody>
         {% for project in projects %}
         <tr>
-            <td>{{ project.name }}</td>
+            <td>
+                <a href="/lanes?project_id={{ project.id }}">{{ project.name }}</a>
+            </td>
             <td>
                 <a href="/projects/{{ project.name }}">查看</a>
                 <a href="/projects/{{ project.name }}/edit">編輯</a>
@@ -31,6 +33,4 @@
         <input type="text" name="name" required>
     </div>
     <button type="submit">新增</button>
-    <br>
-    <a href="/projects">專案管理頁面</a>
 </form>
