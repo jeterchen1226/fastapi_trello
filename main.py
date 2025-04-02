@@ -13,10 +13,13 @@ from models.user import User
 from models.project import Project
 from models.user_project import UserProject
 from models.lane import Lane
+from fastapi.staticfiles import StaticFiles
 
 app.include_router(user_route, prefix="/users")
 app.include_router(project_route, prefix="/projects")
 app.include_router(lane_routes, prefix="/lanes")
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
 def index():
