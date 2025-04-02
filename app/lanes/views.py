@@ -13,7 +13,7 @@ lane = APIRouter()
 @lane.get("/")
 def index(request: Request, project_id: Optional[int] = Query(None), db: Session = Depends(get_db)):
     if project_id:
-        lanes = db.query(Lane).options(selectinload(Lane.project)).filter(Lane.project_id == project_id).all()
+        lanes = db.query(Lane).options(selectinload(Lane.project), selectinload(Lane.tasks)).filter(Lane.project_id == project_id).all()
         project = db.query(Project).filter(Project.id == project_id).first()
         if not project:
             raise HTTPException(status_code=404, detail="查無專案。")

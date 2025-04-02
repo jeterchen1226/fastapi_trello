@@ -1,0 +1,22 @@
+{% if lane %}
+    <h2>泳道名稱：{{ lane.name }}</h2>
+{% endif %}
+
+<h3>新增任務</h3>
+<form action="/tasks" method="POST">
+    <div>
+        <label>名稱：</label>
+        <input type="text" name="name" required>
+        {% if lane %}
+        <input type="hidden" name="lane_id" value="{{ lane.id }}">
+        {% endif %}
+    </div>
+    <button type="submit">新增</button>
+</form>
+
+<br>
+{% if project_id %}
+    <a href="/lanes?project_id={{ project_id }}">回上一頁</a>
+{% else %}
+    <a href="/lanes">回泳道列表</a>
+{% endif %}

@@ -1,0 +1,8 @@
+<h2>編輯任務頁面</h2>
+<form action="/tasks/{{ tasks.id }}/update">
+    <div>
+        <label>名稱：</label>
+        <input type="text" name="name" value="{{ tasks.name }}" required>
+    </div>
+    <button type="submit">更新</button>
+</form>

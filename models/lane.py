@@ -9,3 +9,5 @@ class Lane(Base):
 
     project_id = Column(Integer, ForeignKey("projects.id"))
     project = relationship("Project", back_populates="lanes")
+
+    tasks = relationship("Task", back_populates="lane")
