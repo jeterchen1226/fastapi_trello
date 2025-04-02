@@ -102,8 +102,10 @@ def delete(task_id: int, db: Session = Depends(get_db)):
     tasks = db.query(Task).options(selectinload(Task.lane)).filter(Task.id == task_id).first()
     if not tasks:
         raise HTTPException(status_code=404, detail="查無任務。")
-    lane_id = tasks.lane_id
-    project_id = tasks.lane.project_id if tasks.lane and tasks.lane.project_id else None
+    if tasks.lane and tasks.lane.project_id:
+        project_id = tasks.lane.project_id
+    else:
+        project_id = None
     db.delete(tasks)
     db.commit()
     if project_id:
