@@ -77,7 +77,11 @@ def edit(request: Request, lane_id: int, db: Session = Depends(get_db)):
     lane = db.query(Lane).filter(Lane.id == lane_id).first()
     if lane:
         projects = db.query(Project).all()
-        return templates.TemplateResponse("lanes/edit.html", {"request": request, "lanes": lane, "projects": projects})
+        if projects:
+            project_id = lane.project_id
+        else:
+            project_id = None
+        return templates.TemplateResponse("lanes/edit.html", {"request": request, "lanes": lane, "projects": projects, "project_id": project_id})
     else:
         raise HTTPException(status_code=404, detail="查無泳道。")
 
