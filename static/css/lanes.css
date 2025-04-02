@@ -1,0 +1,36 @@
+.board {
+    display: flex;
+    gap: 16px;
+    padding: 1rem;
+    background-color: #f0f2f5;
+    overflow-x: auto;
+}
+.lane {
+    background-color: #e4e6eb;
+    border-radius: 8px;
+    padding: 1rem;
+    width: 250px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.lane-title {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 0.5rem;
+}
+.lane-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 0.5rem;
+}
+.lane-actions form {
+    display: inline;
+}
+.add-lane-form {
+    margin-top: 2rem;
+    padding: 1rem;
+}
+a {
+    color: #3b49df;
+    text-decoration: none;
+}

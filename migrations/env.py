@@ -15,7 +15,7 @@ from models.user import User
 from models.project import Project
 from models.user_project import UserProject
 from models.lane import Lane
-
+from models.task import Task
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

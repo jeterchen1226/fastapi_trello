@@ -12,6 +12,8 @@ class User(Base):
 
     project_associations = relationship("UserProject", back_populates="user")
 
+    tasks = relationship("Task", back_populates="user")
+
     @property
     def projects(self):
         result = []

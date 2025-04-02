@@ -1,3 +1,12 @@
+<h3>新增專案</h3>
+<form action="/projects" method="POST">
+    <div>
+        <label>名稱</label>
+        <input type="text" name="name" required>
+    </div>
+    <button type="submit">新增</button>
+</form>
+
 <h2>所有專案</h2>
 
 <h3>專案列表</h3>
@@ -25,12 +34,3 @@
         {% endfor %}
     </tbody>
 </table>
-
-<h3>新增專案</h3>
-<form action="/projects" method="POST">
-    <div>
-        <label>名稱</label>
-        <input type="text" name="name" required>
-    </div>
-    <button type="submit">新增</button>
-</form>
