@@ -9,15 +9,18 @@ from app import app
 from app.users.views import user as user_route
 from app.projects.views import project as project_route
 from app.lanes.views import lane as lane_routes
+from app.tasks.views import task as task_routes
 from models.user import User
 from models.project import Project
 from models.user_project import UserProject
 from models.lane import Lane
+from models.task import Task
 from fastapi.staticfiles import StaticFiles
 
 app.include_router(user_route, prefix="/users")
 app.include_router(project_route, prefix="/projects")
 app.include_router(lane_routes, prefix="/lanes")
+app.include_router(task_routes, prefix="/tasks")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 

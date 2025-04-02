@@ -1,0 +1,13 @@
+<h2>任務詳細資訊</h2>
+<div>
+    <p>任務名稱：{{ tasks.name }}</p>
+    {% if tasks.lane %}
+    <p>所屬泳道：{{ tasks.lane.name }}</p>
+    {% endif %}
+</div>
+<div>
+    <a href="/tasks/{{ tasks.id }}/edit">編輯</a>
+    <form action="/tasks/{{ tasks.id }}/delete" method="POST">
+        <button type="submit" onclick="return confirm('確定要刪除嗎？')">刪除</button>
+    </form>
+</div>
