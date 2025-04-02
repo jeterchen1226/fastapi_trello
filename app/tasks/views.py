@@ -69,25 +69,31 @@ def show(request: Request, task_id: int, lane_id: Optional[int] = Query(None), d
 @task.post("/{task_id}/update")
 def update(task_id: int, name: Annotated[str, Form()], db: Session = Depends(get_db)):
     update_data = TaskUpdate(name=name)
-    tasks = db.query(Task).filter(Task.id == task_id).first()
-    if not tasks:
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
         raise HTTPException(status_code=404, detail="查無任務。")
-    lane_id = tasks.lane_id
-    existing_task = db.query(Task).filter(Task.name == update_data.name, Task.id != tasks.id, Task.lane_id == lane_id).first()
+    lane_id = task.lane_id
+    existing_task = db.query(Task).filter(Task.name == update_data.name, Task.id != task.id, Task.lane_id == lane_id).first()
     if existing_task:
         raise HTTPException(status_code=400, detail="該泳道中已有相同名稱任務。")
-    tasks.name = update_data.name
+    task.name = update_data.name
     db.commit()
-    if lane_id:
-        return RedirectResponse(url=f"/tasks?lane_id={lane_id}", status_code=status.HTTP_302_FOUND)
-    return RedirectResponse(url="/tasks", status_code=status.HTTP_302_FOUND)
+    lane = db.query(Lane).filter(Lane.id == lane_id).first()
+    if lane and lane.project_id:
+        return RedirectResponse(url=f"/lanes?project_id={lane.project_id}", status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(url="/lanes", status_code=status.HTTP_302_FOUND)
 
 @task.get("/{task_id}/edit")
 def edit(request: Request, task_id: int, db: Session = Depends(get_db)):
-    tasks = db.query(Task).filter(Task.id == task_id).first()
-    if tasks:
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if task:
+        lane = db.query(Lane).filter(Lane.id == task.lane_id).first()
+        if lane:
+            project_id = lane.project_id
+        else:
+            project_id = None
         lanes = db.query(Lane).all()
-        return templates.TemplateResponse("tasks/edit.html", {"request": request, "tasks": tasks, "lanes": lanes})
+        return templates.TemplateResponse("tasks/edit.html", {"request": request, "tasks": task, "lanes": lanes, "project_id": project_id,})
     else:
         raise HTTPException(status_code=404, detail="查無任務。")
 
@@ -97,8 +103,9 @@ def delete(task_id: int, db: Session = Depends(get_db)):
     if not tasks:
         raise HTTPException(status_code=404, detail="查無任務。")
     lane_id = tasks.lane_id
+    project_id = tasks.lane.project_id if tasks.lane and tasks.lane.project_id else None
     db.delete(tasks)
     db.commit()
-    if lane_id:
-        return RedirectResponse(url=f"/tasks?lane_id={lane_id}", status_code=status.HTTP_302_FOUND)
-    return RedirectResponse(url="/tasks", status_code=status.HTTP_302_FOUND)
+    if project_id:
+        return RedirectResponse(url=f"/lanes?project_id={project_id}", status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(url="/lanes", status_code=status.HTTP_302_FOUND)
