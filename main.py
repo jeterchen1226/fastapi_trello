@@ -1,21 +1,22 @@
-from fastapi import Depends, Query
+from fastapi import Depends, Query, FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from database.db import Base, engine
 from typing import Annotated, Literal
 from pydantic import BaseModel, Field
+from starlette.middleware.base import BaseHTTPMiddleware
+from database.db import Base, engine
 from utils.get_db import get_db
 from app import app
 from app.users.views import user as user_route
 from app.projects.views import project as project_route
 from app.lanes.views import lane as lane_routes
 from app.tasks.views import task as task_routes
-from models.user import User
-from models.project import Project
-from models.user_project import UserProject
-from models.lane import Lane
-from models.task import Task
 from fastapi.staticfiles import StaticFiles
+from middleware import auth_middleware
+from fastapi.responses import RedirectResponse
+
+app.add_middleware(BaseHTTPMiddleware, dispatch=auth_middleware)
 
 app.include_router(user_route, prefix="/users")
 app.include_router(project_route, prefix="/projects")
@@ -26,7 +27,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
 def index():
-    return {"message": "hello world"}
+    return RedirectResponse(url="/users/login")
 
 @app.get("/test-db")
 def test_db_connection(db: Session = Depends(get_db)):
@@ -35,10 +36,6 @@ def test_db_connection(db: Session = Depends(get_db)):
         return {"message": "success"}
     except Exception as e:
         return {"message": "error", "e": e}
-
-@app.get("/test/{test_id}")
-def test(test_id: str):
-    return {"test_id": test_id}
 
 class FilterParams(BaseModel):
     limit: int = Field(100, gt=0, le=100)

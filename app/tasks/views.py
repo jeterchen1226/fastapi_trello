@@ -5,13 +5,15 @@ from sqlalchemy.orm import Session, selectinload
 from utils.get_db import get_db
 from models.task import Task
 from models.lane import Lane
+from models.user import User
 from typing import Annotated, Optional
 from schemas.task import TaskCreate, TaskUpdate
+from utils.auth import get_current_active_user
 
 task = APIRouter()
 
 @task.get("/")
-def index(request: Request, lane_id: Optional[int] = Query(None), db: Session = Depends(get_db)):
+async def index(request: Request, lane_id: Optional[int] = Query(None), current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     if lane_id:
         tasks = db.query(Task).options(selectinload(Task.lane)).filter(Task.lane_id == lane_id).all()
         lanes = db.query(Lane).filter(Lane.id == lane_id).first()
@@ -23,7 +25,7 @@ def index(request: Request, lane_id: Optional[int] = Query(None), db: Session = 
         return templates.TemplateResponse("tasks/index.html", {"request": request, "tasks": tasks, "lane": None})
 
 @task.post("/")
-def create(name: Annotated[str, Form()], lane_id: Annotated[Optional[int], Form()] = None, db: Session = Depends(get_db)):
+async def create(name: Annotated[str, Form()], lane_id: Annotated[Optional[int], Form()] = None, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     create_data = TaskCreate(name=name, lane_id=lane_id)
     if lane_id:
         existing_task = db.query(Task).filter(Task.name == create_data.name, Task.lane_id == lane_id).first()
@@ -45,7 +47,7 @@ def create(name: Annotated[str, Form()], lane_id: Annotated[Optional[int], Form(
     return RedirectResponse(url="/lanes", status_code=status.HTTP_302_FOUND)
 
 @task.get("/new")
-def new(request: Request, lane_id: Optional[int] = Query(None), project_id: Optional[int] = Query(None), db: Session = Depends(get_db)):
+async def new(request: Request, lane_id: Optional[int] = Query(None), project_id: Optional[int] = Query(None), current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     lane = None
     tasks = []
     if lane_id:
@@ -57,7 +59,7 @@ def new(request: Request, lane_id: Optional[int] = Query(None), project_id: Opti
     return templates.TemplateResponse("tasks/index.html", {"request": request, "lane": lane, "project_id": project_id,"tasks": tasks})
 
 @task.get("/{task_id}")
-def show(request: Request, task_id: int, lane_id: Optional[int] = Query(None), db: Session = Depends(get_db)):
+async def show(request: Request, task_id: int, lane_id: Optional[int] = Query(None), current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     query = db.query(Task).options(selectinload(Task.lane)).filter(Task.id == task_id)
     if lane_id:
         query = query.filter(Task.lane_id == lane_id).first()
@@ -67,7 +69,7 @@ def show(request: Request, task_id: int, lane_id: Optional[int] = Query(None), d
             raise HTTPException(status_code=404, detail="查無任務。")
 
 @task.post("/{task_id}/update")
-def update(task_id: int, name: Annotated[str, Form()], db: Session = Depends(get_db)):
+async def update(task_id: int, name: Annotated[str, Form()], current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     update_data = TaskUpdate(name=name)
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
@@ -84,7 +86,7 @@ def update(task_id: int, name: Annotated[str, Form()], db: Session = Depends(get
     return RedirectResponse(url="/lanes", status_code=status.HTTP_302_FOUND)
 
 @task.get("/{task_id}/edit")
-def edit(request: Request, task_id: int, db: Session = Depends(get_db)):
+async def edit(request: Request, task_id: int, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     task = db.query(Task).filter(Task.id == task_id).first()
     if task:
         lane = db.query(Lane).filter(Lane.id == task.lane_id).first()
@@ -98,7 +100,7 @@ def edit(request: Request, task_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="查無任務。")
 
 @task.post("/{task_id}/delete")
-def delete(task_id: int, db: Session = Depends(get_db)):
+async def delete(task_id: int, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     tasks = db.query(Task).options(selectinload(Task.lane)).filter(Task.id == task_id).first()
     if not tasks:
         raise HTTPException(status_code=404, detail="查無任務。")

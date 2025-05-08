@@ -4,14 +4,16 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session, selectinload
 from utils.get_db import get_db
 from models.lane import Lane
+from models.user import User
 from models.project import Project
 from typing import Annotated, Optional
 from schemas.lane import LaneCreate, LaneUpdate
+from utils.auth import get_current_active_user
 
 lane = APIRouter()
 
 @lane.get("/")
-def index(request: Request, project_id: Optional[int] = Query(None), db: Session = Depends(get_db)):
+async def index(request: Request, project_id: Optional[int] = Query(None), current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     if project_id:
         lanes = db.query(Lane).options(selectinload(Lane.project), selectinload(Lane.tasks)).filter(Lane.project_id == project_id).all()
         project = db.query(Project).filter(Project.id == project_id).first()
@@ -23,7 +25,7 @@ def index(request: Request, project_id: Optional[int] = Query(None), db: Session
         return templates.TemplateResponse("lanes/index.html", {"request": request, "lanes": lanes})
 
 @lane.post("/")
-def create(request: Request, name: Annotated[str, Form()], project_id: Annotated[Optional[int], Form()] = None, db: Session = Depends(get_db)):
+async def create(request: Request, name: Annotated[str, Form()], project_id: Annotated[Optional[int], Form()] = None, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     create_data = LaneCreate(name=name, project_id=project_id)
     if project_id:
         lanes = db.query(Lane).filter(Lane.name == create_data.name, Lane.project_id == project_id).first()
@@ -41,12 +43,12 @@ def create(request: Request, name: Annotated[str, Form()], project_id: Annotated
     return RedirectResponse(url="/lanes", status_code=status.HTTP_302_FOUND)
 
 @lane.get("/new")
-def new(request: Request, db: Session = Depends(get_db)):
+async def new(request: Request, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     projects = db.query(Project).all()
     return templates.TemplateResponse("lanes/new.html", {"request": request, "projects": projects})
 
 @lane.post("/{lane_id}/update")
-def update(lane_id: int, name: Annotated[str, Form()], db: Session = Depends(get_db)):
+async def update(lane_id: int, name: Annotated[str, Form()], current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     update_data = LaneUpdate(name=name)
     lane = db.query(Lane).filter(Lane.id == lane_id).first()
     if not lane:
@@ -62,7 +64,7 @@ def update(lane_id: int, name: Annotated[str, Form()], db: Session = Depends(get
     return RedirectResponse(url="/lanes", status_code=status.HTTP_302_FOUND)
 
 @lane.get("/{lane_id}")
-def show(request: Request, lane_id: int, project_id: Optional[int] = Query(None), db: Session = Depends(get_db)):
+async def show(request: Request, lane_id: int, project_id: Optional[int] = Query(None), current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     query = db.query(Lane).options(selectinload(Lane.project)).filter(Lane.id == lane_id)
     if project_id:
         query = query.filter(Lane.project_id == project_id)
@@ -73,7 +75,7 @@ def show(request: Request, lane_id: int, project_id: Optional[int] = Query(None)
         raise HTTPException(status_code=404, detail="查無泳道。")
 
 @lane.get("/{lane_id}/edit")
-def edit(request: Request, lane_id: int, db: Session = Depends(get_db)):
+async def edit(request: Request, lane_id: int, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     lane = db.query(Lane).filter(Lane.id == lane_id).first()
     if lane:
         projects = db.query(Project).all()
@@ -86,7 +88,7 @@ def edit(request: Request, lane_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="查無泳道。")
 
 @lane.post("/{lane_id}/delete")
-def delete(lane_id: int, db: Session = Depends(get_db)):
+async def delete(lane_id: int, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     lane = db.query(Lane).options(selectinload(Lane.project)).filter(Lane.id == lane_id).first()
     if not lane:
         raise HTTPException(status_code=404, detail="查無泳道。")    
