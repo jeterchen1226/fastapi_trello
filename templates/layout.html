@@ -2,7 +2,12 @@
 <html class="h-full">
 <head>
     <title>{% block title %}看板系統{% endblock %}</title>
+    <!-- tailwindcss -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     {% block head %}{% endblock %}
 </head>
 <body class="flex flex-col h-full bg-gray-100">
@@ -24,7 +29,7 @@
         </div>
     </header>
 
-    <main class="flex-grow container mx-auto px-4 py-6">
+    <main class="flex-grow container mx-auto px-4 py-6" id="main-content">
         {% block content %}{% endblock %}
     </main>
 

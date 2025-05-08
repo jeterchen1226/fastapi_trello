@@ -1,0 +1,14 @@
+<div id="content-area" class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-semibold mb-4">專案詳細資訊</h2>
+    <div x-data="{ showEditButton: false }">
+    <div @mouseover="showEditButton = true" @mouseleave="showEditButton = false" class="mb-4">
+        <p class="mb-2"><span class="font-medium">專案名稱：</span>{{ projects.name }}</p>
+        {% if projects.description %}
+        <p><span class="font-medium">專案描述：</span>{{ projects.description }}</p>
+        {% else %}
+        <p><span class="font-medium">專案描述：</span><em>無描述</em></p>
+        {% endif %}
+    </div>
+    <a hx-get="/projects" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="true" class="text-orange-500 hover:text-orange-700">回首頁</a>
+    </div>
+</div>
