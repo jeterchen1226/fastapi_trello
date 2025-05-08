@@ -1,8 +1,7 @@
-<h2>專案詳細資訊</h2>
-<div>
-    <p>專案名稱：{{ projects.name }}</p>
-    {% if projects.description %}
-    <p>專案描述：{{ projects.description }}</p>
-    {% endif %}
-</div>
-<a href="/projects">回首頁</a>
+{% extends "layout.html" %}
+
+{% block title %}專案詳細資訊{% endblock %}
+
+{% block content %}
+{% include "projects/partials/projects_show.html" %}
+{% endblock %}
