@@ -5,18 +5,20 @@ from sqlalchemy.orm import Session, selectinload
 from utils.get_db import get_db
 from models.project import Project
 from models.lane import Lane
+from models.user import User
 from typing import Annotated, Optional
 from schemas.project import ProjectCreate, ProjectUpdate
+from utils.auth import get_current_active_user
 
 project = APIRouter()
 
 @project.get("/")
-def index(request: Request, db: Session = Depends(get_db)):
+async def index(request: Request, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     projects = db.query(Project).order_by(Project.name.desc()).all()
-    return templates.TemplateResponse("projects/index.html", {"request": request, "projects": projects})
+    return templates.TemplateResponse("projects/index.html", {"request": request, "projects": projects, "current_user": current_user})
 
 @project.post("/")
-def create(request: Request, name: Annotated[str, Form()], db: Session = Depends(get_db)):
+async def create(request: Request, name: Annotated[str, Form()], current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     create_data = ProjectCreate(name = name)
     projects = db.query(Project).filter(Project.name == create_data.name).first()
     if projects:
@@ -28,11 +30,11 @@ def create(request: Request, name: Annotated[str, Form()], db: Session = Depends
     return RedirectResponse(url="/projects", status_code=status.HTTP_302_FOUND)
 
 @project.get("/new")
-def new(request: Request):
+async def new(request: Request, current_user: User = Depends(get_current_active_user),):
     return templates.TemplateResponse("projects/index.html", {"request": request})
 
 @project.post("/{project_name}/update")
-def update(project_name: str, name: Annotated[str, Form()], description: Annotated[Optional[str], Form()] = None, db: Session = Depends(get_db)):
+async def update(project_name: str, name: Annotated[str, Form()], description: Annotated[Optional[str], Form()] = None, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     update_data = ProjectUpdate(name = name, description = description)
     projects = db.query(Project).filter(Project.name == project_name).first()
     if not projects:
@@ -47,7 +49,7 @@ def update(project_name: str, name: Annotated[str, Form()], description: Annotat
     return RedirectResponse(url="/projects", status_code=status.HTTP_302_FOUND)
 
 @project.get("/{project_name}")
-def show(request: Request, project_name: str, db: Session = Depends(get_db)):
+async def show(request: Request, project_name: str, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     projects = db.query(Project).filter(Project.name == project_name).first()
     if not projects:
         raise HTTPException(status_code=404, detail="查無專案。")
@@ -55,7 +57,7 @@ def show(request: Request, project_name: str, db: Session = Depends(get_db)):
     return templates.TemplateResponse("projects/show.html", {"request": request, "projects": projects, "lanes": lanes})
 
 @project.get("/{project_name}/edit")
-def edit(request: Request, project_name: str, db: Session = Depends(get_db)):
+async def edit(request: Request, project_name: str, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     projects = db.query(Project).filter(Project.name == project_name).first()
     if projects:
         return templates.TemplateResponse("projects/edit.html", {"request": request, "projects": projects})
@@ -63,7 +65,7 @@ def edit(request: Request, project_name: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="查無專案名稱。")
 
 @project.post("/{project_name}/delete")
-def delete(project_name: str, db: Session = Depends(get_db)):
+async def delete(project_name: str, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     projects = db.query(Project).filter(Project.name == project_name).first()
     if projects:
         db.delete(projects)

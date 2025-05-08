@@ -1,3 +1,8 @@
+{% extends "layout.html" %}
+
+{% block title %}專案列表{% endblock %}
+
+{% block content %}
 <h3>新增專案</h3>
 <form action="/projects" method="POST">
     <div>
@@ -6,8 +11,6 @@
     </div>
     <button type="submit">新增</button>
 </form>
-
-<h2>所有專案</h2>
 
 <h3>專案列表</h3>
 <table border="1">
@@ -34,3 +37,4 @@
         {% endfor %}
     </tbody>
 </table>
+{% endblock %}
