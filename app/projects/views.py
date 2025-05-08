@@ -44,7 +44,7 @@ def update(project_name: str, name: Annotated[str, Form()], description: Annotat
     if description is not None:
         projects.description = update_data.description
     db.commit()
-    return RedirectResponse(url=f"/projects/{name}", status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(url="/projects", status_code=status.HTTP_302_FOUND)
 
 @project.get("/{project_name}")
 def show(request: Request, project_name: str, db: Session = Depends(get_db)):
