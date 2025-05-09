@@ -1,0 +1,23 @@
+<form method="POST" action="/tasks">
+    <div class="mb-4">
+        <label for="name" class="block text-gray-700 font-medium mb-2">任務名稱：</label>
+        <input type="text" name="name" id="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+    </div>
+    {% if lane %}
+        <input type="hidden" name="lane_id" value="{{ lane.id }}">
+    {% else %}
+        <div class="mb-4">
+            <label for="lane_id" class="block text-gray-700 font-medium mb-2">泳道：</label>
+            <select name="lane_id" id="lane_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                <option value="">-- 無泳道 --</option>
+                {% for lane in lanes %}
+                    <option value="{{ lane.id }}">{{ lane.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    {% endif %}
+    <div class="flex justify-end space-x-3">
+        <button type="button" onclick="this.closest('div.bg-white').remove()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md">取消</button>
+        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md">儲存</button>
+    </div>
+</form>

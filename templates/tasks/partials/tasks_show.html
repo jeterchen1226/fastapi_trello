@@ -1,0 +1,15 @@
+<div id="task-{{ task.id }}" class="bg-white rounded-lg shadow-md p-4">
+    <div class="flex justify-between items-center">
+        <h3 class="font-semibold text-gray-800">{{ task.name }}</h3>
+        <div class="flex space-x-2">
+            <button hx-get="/tasks/{{ task.id }}/edit" hx-target="#task-{{ task.id }}" hx-swap="outerHTML" class="text-blue-500 hover:text-blue-700">編輯</button>
+            
+            <form hx-post="/tasks/{{ task.id }}/delete" hx-target="#task-{{ task.id }}" hx-swap="outerHTML" hx-confirm="確定要刪除嗎？" class="inline">
+                <button type="submit" class="text-red-500 hover:text-red-700">刪除</button>
+            </form>
+        </div>
+    </div>
+    {% if task.lane %}
+        <p class="text-gray-600 text-sm mt-1">所屬泳道：{{ task.lane.name }}</p>
+    {% endif %}
+</div>

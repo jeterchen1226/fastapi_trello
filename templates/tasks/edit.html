@@ -1,14 +1,7 @@
-<h2>編輯任務頁面</h2>
-<form action="/tasks/{{ tasks.id }}/update" method="POST">
-    <div>
-        <label>名稱：</label>
-        <input type="text" name="name" value="{{ tasks.name }}" required>
-    </div>
-    <button type="submit">更新</button>
-</form>
+{% extends "layout.html" %}
 
-{% if project_id %}
-    <a href="/lanes?project_id={{ project_id }}">回上一頁</a>
-{% else %}
-    <a href="/lanes">回泳道列表</a>
-{% endif %}
+{% block title %}任務編輯頁面{% endblock %}
+
+{% block content %}
+{% include "tasks/partials/tasks_edit.html" %}
+{% endblock %}
