@@ -3,36 +3,5 @@
 {% block title %}專案列表{% endblock %}
 
 {% block content %}
-<div class="mb-6">
-    <button hx-get="/projects/new" hx-target="#new-project-form" hx-swap="innerHTML" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md transition duration-200">新增專案</button>
-    <div id="new-project-form"></div>
-</div>
-<div id="project-list">
-    <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-md">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="px-4 py-3 text-left text-gray-700 font-semibold">專案列表</th>
-                <th class="px-4 py-3 text-left text-gray-700 font-semibold">操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for project in projects %}
-            <tr class="border-t border-gray-200">
-                <td class="px-4 py-3">
-                    <a href="/lanes?project_id={{ project.id }}" class="text-orange-500 hover:text-orange-700">{{ project.name }}</a>
-                </td>
-                <td class="px-4 py-3">
-                    <div class="flex space-x-2">
-                        <button hx-get="/projects/{{ project.name }}" hx-target="#main-content" hx-push-url="true" class="text-blue-500 hover:text-blue-700">查看</button>
-                        <button hx-get="/projects/{{ project.name }}/edit"hx-target="#main-content" hx-push-url="true" class="text-blue-500 hover:text-blue-700">編輯</button>
-                        <form hx-post="/projects/{{ project.name }}/delete" hx-target="#project-list" hx-swap="outerHTML" class="inline">
-                            <button type="submit" onclick="return confirm('確定要刪除嗎？')" class="text-red-500 hover:text-red-700">刪除</button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+{% include "projects/partials/projects_list.html" %}
 {% endblock %}
