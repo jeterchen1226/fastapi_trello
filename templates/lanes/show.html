@@ -17,11 +17,11 @@
         </div>
         {% endif %}
         <div class="flex justify-between pt-4">
-            <a href="{% if lanes.project_id %}/lanes?project_id={{ lanes.project_id }}{% else %}/lanes{% endif %}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md transition duration-200">返回</a>
+            <a href="{% if lanes.project_id %}/lanes?project_id={{ lanes.project_id }}{% else %}/lanes{% endif %}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md">返回</a>
             <div class="flex space-x-2">
-                <a href="/lanes/{{ lanes.id }}/edit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-200">編輯</a>
+                <a href="/lanes/{{ lanes.id }}/edit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">編輯</a>
                 <form action="/lanes/{{ lanes.id }}/delete" method="POST" class="inline">
-                    <button type="submit" onclick="return confirm('確定要刪除嗎？')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition duration-200">刪除</button>
+                    <button type="submit" onclick="return confirm('確定要刪除嗎？')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">刪除</button>
                 </form>
             </div>
         </div>

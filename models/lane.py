@@ -6,6 +6,7 @@ class Lane(Base):
     __tablename__ = "lanes"
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String, nullable=False)
+    position = Column(Integer)
 
     project_id = Column(Integer, ForeignKey("projects.id"))
     project = relationship("Project", back_populates="lanes")
