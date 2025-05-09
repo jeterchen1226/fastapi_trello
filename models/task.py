@@ -14,3 +14,4 @@ class Task(Base):
     priority = Column(String, nullable=True)
     status = Column(String, nullable=True)
     end_date = Column(DateTime)
+    position = Column(Integer)

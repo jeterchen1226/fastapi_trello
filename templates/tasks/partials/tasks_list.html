@@ -1,0 +1,20 @@
+<div class="mb-6">
+    {% if lane %}
+        <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+            <h2 class="text-xl font-semibold text-gray-800">泳道名稱：{{ lane.name }}</h2>
+            <div class="mt-2">
+                <button hx-get="/tasks/new?lane_id={{ lane.id }}{% if project_id %}&project_id={{ project_id }}{% endif %}" hx-target="#new-task-form" hx-swap="innerHTML" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition duration-200">新增任務</button>
+                <div id="new-task-form"></div>
+            </div>
+        </div>
+    {% else %}
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">所有任務</h2>
+    {% endif %}
+    {% if project_id %}
+        <a href="/lanes?project_id={{ project_id }}" class="text-blue-500 hover:text-blue-700 inline-block mb-4">回到泳道列表</a>
+    {% endif %}
+</div>
+
+<div id="task-items" class="space-y-4">
+    {% include "tasks/partials/tasks_item.html" %}
+</div>
