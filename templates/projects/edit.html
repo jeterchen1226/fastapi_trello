@@ -1,19 +1,7 @@
-<h2>編輯專案頁面</h2>
-<div x-data="{project: { name: '{{ projects.name }}', description: '{{ projects.description }}' }, originalName: '{{ projects.name }}', submitting: false, message: ''}">
-    <!-- <form hx-post="/projects/{{ projects.name }}/update" hx-swap="outerHTML" hx-target="#main-content" hx-trigger="submit" hx-indicator="#spinner" @submit="submitting = true"> -->
-        <form hx-post="/projects/{{ projects.name }}/update" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="true"@submit="submitting = true">
-        <div>
-            <label>名稱：</label>
-            <input type="text" name="name" x-model="project.name" required>
-        </div>
-        <div>
-            <label>描述：</label>
-            <input type="text" name="description" x-model="project.description">
-        </div>
-        <div>
-            <button type="submit" :disabled="submitting"><span x-show="!submitting">更新</span></button>
-        </div>
-        <div x-show="message" x-text="message" class="message"></div>
-    </form>
-    <a href="/projects" hx-get="/projects" hx-push-url="true" hx-trigger="click">回首頁</a>
-</div>
+{% extends "layout.html" %}
+
+{% block title %}專案編輯頁面{% endblock %}
+
+{% block content %}
+{% include "projects/partials/projects_edit.html" %}
+{% endblock %}
