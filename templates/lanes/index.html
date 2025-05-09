@@ -1,58 +1,7 @@
-<link rel="stylesheet" href="{{ request.url_for('static', path='css/lanes.css') }}">
-<div class="add-lane-form">
-    <h3>新增泳道</h3>
-    <form action="/lanes" method="POST">
-        <div>
-            <label>名稱</label>
-            <input type="text" name="name" required>
-            {% if project %}
-            <input type="hidden" name="project_id" value="{{ project.id }}">
-            {% endif %}
-        </div>
-        <button type="submit">新增</button>
-    </form>
-</div>
+{% extends "layout.html" %}
 
-<a href="/projects">回首頁</a>
+{% block title %}泳道列表{% endblock %}
 
-{% if project %}
-    <h2>專案名稱：{{ project.name }}</h2>
-    {% if project.description %}
-        <p>詳細說明：{{ project.description }}</p>
-    {% endif %}
-{% else %}
-    <h2>所有泳道</h2>
-{% endif %}
-
-<div class="board">
-    {% for lane in lanes %}
-        <div class="lane">
-            <div class="lane-header">
-                <span class="lane-title">{{ lane.name }}</span>
-                <span class="lane-controls">
-                    <a href="/tasks/new?lane_id={{ lane.id }}&project_id={{ project.id if project }}">＋</a>
-                    <a href="/lanes/{{ lane.id }}/edit">編輯</a>
-                    <form action="/lanes/{{ lane.id }}/delete" method="POST" style="display:inline;">
-                        <button type="submit" onclick="return confirm('確定要刪除嗎？')">刪除</button>
-                    </form>
-                </span>
-            </div>
-
-            {% if lane.tasks %}
-                {% for task in lane.tasks %}
-                    <div class="task-item">
-                        {{ task.name }}
-                        <div class="lane-actions">
-                            <a href="/tasks/{{ task.id }}/edit">編輯</a>
-                            <form action="/tasks/{{ task.id }}/delete" method="POST">
-                                <button type="submit" onclick="return confirm('確定要刪除嗎？')">刪除</button>
-                            </form>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p>尚無任務</p>
-            {% endif %}
-        </div>
-    {% endfor %}
-</div>
+{% block content %}
+{% include "lanes/partials/lanes_list.html" %}
+{% endblock %}

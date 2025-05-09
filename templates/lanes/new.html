@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}新增泳道{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-semibold mb-4">新增泳道</h2>
+    <form action="/lanes" method="POST" class="space-y-4">
+        <div>
+            <label for="name" class="block text-gray-700 font-medium mb-1">名稱：</label>
+            <input type="text" name="name" id="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+        </div>
+        <div>
+            <label for="project_id" class="block text-gray-700 font-medium mb-1">專案：</label>
+            <select name="project_id" id="project_id" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <option value="">-- 無專案 --</option>
+                {% for project in projects %}
+                    <option value="{{ project.id }}"{% if request.query_params.get('project_id')|int == project.id %} selected{% endif %}>{{ project.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="flex justify-between pt-2">
+            <a href="{% if request.query_params.get('project_id') %}/lanes?project_id={{ request.query_params.get('project_id') }}{% else %}/lanes{% endif %}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md transition duration-200">返回</a>
+            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md">儲存</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
