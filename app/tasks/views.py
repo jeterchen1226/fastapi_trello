@@ -106,15 +106,13 @@ async def update(task_id: int, name: Annotated[str, Form()], request: Request, c
             if request.headers.get("HX-Request") == "true":
                 return HTMLResponse(content=f"""<div id="error-message" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">該泳道中已有相同名稱任務</div>""", status_code=400)
             else:
-                # 非HTMX請求，拋出異常
                 raise HTTPException(status_code=400, detail="該泳道中已有相同名稱任務。")
     task_obj.name = update_data.name
     db.commit()
     db.refresh(task_obj)
     is_htmx = request.headers.get("HX-Request") == "true"
     if is_htmx:
-        content = templates.get_template("tasks/partials/tasks_show.html").render({"request": request, "task": task_obj, "project_id": project_id, "current_user": current_user})
-        return HTMLResponse(content=content)
+        return HTMLResponse(content="", headers={"HX-Redirect": f"/lanes?project_id={project_id}" if project_id else "/lanes"})
     else:
         if project_id:
             return RedirectResponse(url=f"/lanes?project_id={project_id}", status_code=status.HTTP_302_FOUND)
