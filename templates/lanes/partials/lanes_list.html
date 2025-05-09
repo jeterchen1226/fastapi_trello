@@ -1,0 +1,68 @@
+<div class="mb-6">
+    <button hx-get="/lanes/new{% if project %}?project_id={{ project.id }}{% endif %}" hx-target="#new-lane-form" hx-swap="innerHTML" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md transition duration-200">新增泳道</button>
+    <div id="new-lane-form"></div>
+</div>
+
+<div class="mb-6">    
+    {% if project %}
+        <div class="bg-white p-4 rounded-lg shadow-md mb-4 mt-4">
+            <h2 class="text-xl font-semibold text-gray-800">專案名稱：{{ project.name }}</h2>
+            {% if project.description %}
+                <p class="text-gray-600 mt-2">詳細說明：{{ project.description }}</p>
+            {% endif %}
+        </div>
+    {% else %}
+        <h2 class="text-xl font-semibold text-gray-800 mt-4">所有泳道</h2>
+    {% endif %}
+</div>
+
+<div id="lanes-container" class="flex flex-wrap gap-4">
+    {% for lane in lanes %}
+        <div class="bg-white rounded-lg shadow-md p-4 w-64">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-semibold text-gray-800">{{ lane.name }}</h3>
+                <div class="flex space-x-2">
+                    <button hx-get="/lanes/{{ lane.id }}/edit" hx-target="#main-content" hx-push-url="true" class="text-blue-500 hover:text-blue-700">編輯</button>
+                    <form hx-post="/lanes/{{ lane.id }}/delete" hx-target="#main-content" hx-swap="innerHTML" class="inline">
+                        <button type="submit" onclick="return confirm('確定要刪除嗎？')" class="text-red-500 hover:text-red-700">刪除</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="mt-2">
+                <button hx-get="/tasks/new?lane_id={{ lane.id }}{% if project %}&project_id={{ project.id }}{% endif %}" 
+                        hx-target="#new-task-form-{{ lane.id }}" 
+                        hx-swap="innerHTML" 
+                        class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded-md text-sm transition duration-200">
+                    新增任務
+                </button>
+                <div id="new-task-form-{{ lane.id }}"></div>
+            </div>
+            
+            <div class="mt-3 space-y-2">
+                {% if lane.tasks %}
+                    {% for task in lane.tasks %}
+                        <div class="bg-gray-50 p-2 rounded border border-gray-200">
+                            <div class="flex justify-between">
+                                <span>{{ task.name }}</span>
+                                <div class="flex space-x-1">
+                                    <button hx-get="/tasks/{{ task.id }}/edit" 
+                                            hx-target="#main-content" 
+                                            hx-push-url="true" 
+                                            class="text-xs text-blue-500 hover:text-blue-700">
+                                        編輯
+                                    </button>
+                                    <form hx-post="/tasks/{{ task.id }}/delete" hx-target="#main-content" hx-swap="innerHTML" class="inline">
+                                        <button type="submit" onclick="return confirm('確定要刪除嗎？')" class="text-xs text-red-500 hover:text-red-700">刪除</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-gray-500 text-sm italic">尚無任務</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>

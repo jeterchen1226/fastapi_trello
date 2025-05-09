@@ -1,0 +1,25 @@
+<div class="bg-white p-6 rounded-lg shadow-md mb-6">
+    <form hx-post="/lanes" hx-target="#main-content" hx-swap="innerHTML">
+        <div class="mb-4">
+            <label for="name" class="block text-gray-700 font-medium mb-2">泳道名稱：</label>
+            <input type="text" name="name" id="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+        </div>
+        {% if project %}
+            <input type="hidden" name="project_id" value="{{ project.id }}">
+        {% else %}
+            <div class="mb-4">
+                <label for="project_id" class="block text-gray-700 font-medium mb-2">專案：</label>
+                <select name="project_id" id="project_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <option value="">-- 無專案 --</option>
+                    {% for project in projects %}
+                        <option value="{{ project.id }}">{{ project.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+        <div class="flex justify-end space-x-3">
+            <button type="button" onclick="this.closest('div.bg-white').remove()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md">取消</button>
+            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md">儲存</button>
+        </div>
+    </form>
+</div>

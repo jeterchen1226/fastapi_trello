@@ -1,16 +1,30 @@
-<h2>泳道詳細資訊</h2>
-<div>
-    <p>泳道名稱：{{ lanes.name }}</p>
-    {% if lanes.project %}
-    <p>所屬專案：{{ lanes.project.name }}</p>
-    {% else %}
-    <p>所屬專案：無</p>
-    {% endif %}
-</div>
+{% extends "layout.html" %}
 
-<div>
-    <a href="/lanes/{{ lanes.id }}/edit">編輯</a>
-    <form action="/lanes/{{ lanes.id }}/delete" method="POST" style="display:inline;">
-        <button type="submit" onclick="return confirm('確定要刪除嗎？')">刪除</button>
-    </form>
+{% block title %}泳道詳情{% endblock %}
+
+{% block content %}
+<div id="content-area" class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-semibold mb-4">泳道詳情</h2>
+    <div class="space-y-4">
+        <div>
+            <h3 class="text-lg font-medium text-gray-700">名稱：</h3>
+            <p class="text-gray-800">{{ lanes.name }}</p>
+        </div>
+        {% if lanes.project %}
+        <div>
+            <h3 class="text-lg font-medium text-gray-700">所屬專案：</h3>
+            <p class="text-gray-800">{{ lanes.project.name }}</p>
+        </div>
+        {% endif %}
+        <div class="flex justify-between pt-4">
+            <a href="{% if lanes.project_id %}/lanes?project_id={{ lanes.project_id }}{% else %}/lanes{% endif %}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md transition duration-200">返回</a>
+            <div class="flex space-x-2">
+                <a href="/lanes/{{ lanes.id }}/edit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-200">編輯</a>
+                <form action="/lanes/{{ lanes.id }}/delete" method="POST" class="inline">
+                    <button type="submit" onclick="return confirm('確定要刪除嗎？')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition duration-200">刪除</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+{% endblock %}
