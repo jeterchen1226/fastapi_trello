@@ -1,5 +1,5 @@
 <div class="mb-6">
-    <button hx-get="/lanes/new{% if project %}?project_id={{ project.id }}{% endif %}" hx-target="#new-lane-form" hx-swap="innerHTML" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md transition duration-200">新增泳道</button>
+    <button hx-get="/lanes/new{% if project %}?project_id={{ project.id }}{% endif %}" hx-target="#new-lane-form" hx-swap="innerHTML" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md">新增泳道</button>
     <div id="new-lane-form"></div>
 </div>
 
@@ -30,12 +30,7 @@
             </div>
             
             <div class="mt-2">
-                <button hx-get="/tasks/new?lane_id={{ lane.id }}{% if project %}&project_id={{ project.id }}{% endif %}" 
-                        hx-target="#new-task-form-{{ lane.id }}" 
-                        hx-swap="innerHTML" 
-                        class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded-md text-sm transition duration-200">
-                    新增任務
-                </button>
+                <button hx-get="/tasks/new?lane_id={{ lane.id }}{% if project %}&project_id={{ project.id }}{% endif %}" hx-target="#new-task-form-{{ lane.id }}" hx-swap="innerHTML" class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded-md text-sm">新增任務</button>
                 <div id="new-task-form-{{ lane.id }}"></div>
             </div>
             
@@ -46,12 +41,7 @@
                             <div class="flex justify-between">
                                 <span>{{ task.name }}</span>
                                 <div class="flex space-x-1">
-                                    <button hx-get="/tasks/{{ task.id }}/edit" 
-                                            hx-target="#main-content" 
-                                            hx-push-url="true" 
-                                            class="text-xs text-blue-500 hover:text-blue-700">
-                                        編輯
-                                    </button>
+                                    <button hx-get="/tasks/{{ task.id }}/edit" hx-target="#main-content" hx-push-url="true" class="text-xs text-blue-500 hover:text-blue-700">編輯</button>
                                     <form hx-post="/tasks/{{ task.id }}/delete" hx-target="#main-content" hx-swap="innerHTML" class="inline">
                                         <button type="submit" onclick="return confirm('確定要刪除嗎？')" class="text-xs text-red-500 hover:text-red-700">刪除</button>
                                     </form>

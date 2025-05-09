@@ -20,7 +20,7 @@
             </select>
         </div>
         <div class="flex justify-between pt-2">
-            <a href="{% if request.query_params.get('project_id') %}/lanes?project_id={{ request.query_params.get('project_id') }}{% else %}/lanes{% endif %}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md transition duration-200">返回</a>
+            <a href="{% if request.query_params.get('project_id') %}/lanes?project_id={{ request.query_params.get('project_id') }}{% else %}/lanes{% endif %}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md">返回</a>
             <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md">儲存</button>
         </div>
     </form>
