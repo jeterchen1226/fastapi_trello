@@ -10,18 +10,20 @@ from typing import Annotated, Optional
 from schemas.project import ProjectCreate, ProjectUpdate
 from utils.auth import get_current_active_user
 from app import templates
+from utils.flash import get_flash_message
 
 project = APIRouter()
 
 @project.get("/")
 async def index(request: Request, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).all()
+    flash_category, flash_message = get_flash_message(request)
     is_htmx = request.headers.get("HX-Request") == "true"
     if is_htmx:
         content = templates.get_template("projects/partials/projects_list.html").render({"request": request, "projects": projects, "current_user": current_user})
         return HTMLResponse(content=content)
     else:
-        return templates.TemplateResponse("projects/index.html", {"request": request, "projects": projects, "current_user": current_user})
+        return templates.TemplateResponse("projects/index.html", {"request": request, "projects": projects, "current_user": current_user, "flash_category": flash_category, "flash_message": flash_message})
 
 @project.post("/")
 async def create(request: Request, name: Annotated[str, Form()], current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
@@ -95,7 +97,7 @@ async def update(project_name: str, name: Annotated[str, Form()], request: Reque
         if is_htmx:
             content = templates.get_template("projects/partials/projects_show.html").render({"request": request, "projects": project, "current_user": current_user})
             message_data = {
-                "message": "專案更新成功。",
+                "message": "編輯成功。",
                 "type": "success",
             }
             content_message = f"""<div id="message-data" style="display:none;" data-message="{message_data['message']}" data-type="{message_data['type']}"></div>{content}"""

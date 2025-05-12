@@ -14,6 +14,7 @@ from utils.auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
 from models.user import User
+import urllib.parse
 
 user = APIRouter()
 
@@ -23,10 +24,8 @@ def register_form(request: Request):
 
 @user.post("/register")
 def register(request: Request, name: Annotated[str, Form()], email: Annotated[str, Form()], password: Annotated[str, Form()], password_confirmation: Annotated[str, Form()], db: Session = Depends(get_db)):
-    # 檢查密碼確認是否匹配
     if password != password_confirmation:
         return templates.TemplateResponse("auth/register.html", {"request": request, "error": "密碼與確認密碼不匹配"}, status_code=400)
-    # 檢查郵箱是否已經被註冊
     existing_user = db.query(User).filter(User.email == email).first()
     if existing_user:
         return templates.TemplateResponse("auth/register.html", {"request": request, "error": "該郵箱已被註冊"}, status_code=400)
@@ -34,10 +33,10 @@ def register(request: Request, name: Annotated[str, Form()], email: Annotated[st
     new_user = User(name=name, email=email, password=hashed_password)
     db.add(new_user)
     db.commit()
-    # 自動登入並生成 token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(data={"sub": email}, expires_delta=access_token_expires)
-    response = RedirectResponse(url="/projects", status_code=status.HTTP_302_FOUND)
+    encoded_name = urllib.parse.quote(name)
+    response = RedirectResponse(url=f"/projects?register=success&name={encoded_name}", status_code=status.HTTP_302_FOUND)
     response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
     return response
 
@@ -52,14 +51,13 @@ async def login(request: Request, form_data: Annotated[OAuth2PasswordRequestForm
         return templates.TemplateResponse("auth/login.html", {"request": request, "error": "無效的電子郵件或密碼"}, status_code=400)
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
-    
-    response = RedirectResponse(url="/projects", status_code=status.HTTP_302_FOUND)
+    response = RedirectResponse(url=f"/projects?login=success&name={urllib.parse.quote(user.name)}", status_code=status.HTTP_302_FOUND)
     response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
     return response
 
 @user.get("/logout")
 def logout():
-    response = RedirectResponse(url="/users/login", status_code=status.HTTP_302_FOUND)
+    response = RedirectResponse(url="/users/login?logout=success", status_code=status.HTTP_302_FOUND)
     response.delete_cookie(key="access_token")
     return response
 
