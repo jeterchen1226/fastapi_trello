@@ -109,7 +109,7 @@ async def update(project_name: str, name: Annotated[str, Form()], request: Reque
 
 @project.get("/{project_name}")
 async def show(request: Request, project_name: str, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
-    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).first()
+    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id, Project.name == project_name).order_by(Project.name.desc()).first()
     if not projects:
         raise HTTPException(status_code=404, detail="查無專案。")
     lanes = db.query(Lane).filter(Lane.project_id == projects.id).all()
@@ -122,7 +122,7 @@ async def show(request: Request, project_name: str, current_user: User = Depends
 
 @project.get("/{project_name}/edit")
 async def edit(request: Request, project_name: str, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
-    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).first()
+    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id, Project.name == project_name).order_by(Project.name.desc()).first()
     if not projects:
         raise HTTPException(status_code=404, detail="查無專案名稱。")
     is_htmx = request.headers.get("HX-Request") == "true"
