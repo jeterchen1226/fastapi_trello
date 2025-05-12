@@ -1,4 +1,4 @@
-<form method="POST" action="/tasks">
+<form hx-post="/tasks" hx-target="#task-list-{{ lane.id }}" hx-swap="innerHTML" hx-on::after-request="this.reset(); document.querySelector('#new-task-form-{{ lane.id }}').innerHTML = '';">
     <div class="mb-4">
         <label for="name" class="block text-gray-700 font-medium mb-2">任務名稱：</label>
         <input type="text" name="name" id="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
@@ -17,7 +17,7 @@
         </div>
     {% endif %}
     <div class="flex justify-end space-x-3">
-        <button type="button" onclick="this.closest('div.bg-white').remove()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md">取消</button>
+        <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md" hx-get="/tasks/empty" hx-target="#new-task-form-{{ lane.id }}" hx-swap="innerHTML">取消</button>
         <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md">儲存</button>
     </div>
 </form>
