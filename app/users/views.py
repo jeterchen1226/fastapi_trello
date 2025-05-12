@@ -71,7 +71,6 @@ async def create(request: Request, name: Annotated[str, Form()], password: Annot
     existing_user = db.query(User).filter(User.email == email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="電子郵件已被註冊")
-    
     hashed_password = get_password_hash(password)
     new_user = User(name=name, password=hashed_password, email=email)
     db.add(new_user)
