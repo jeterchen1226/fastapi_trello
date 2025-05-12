@@ -5,6 +5,7 @@ from utils.get_db import get_db
 from models.project import Project
 from models.lane import Lane
 from models.user import User
+from models.user_project import UserProject
 from typing import Annotated, Optional
 from schemas.project import ProjectCreate, ProjectUpdate
 from utils.auth import get_current_active_user
@@ -14,7 +15,7 @@ project = APIRouter()
 
 @project.get("/")
 async def index(request: Request, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
-    projects = db.query(Project).order_by(Project.name.desc()).all()
+    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).all()
     is_htmx = request.headers.get("HX-Request") == "true"
     if is_htmx:
         content = templates.get_template("projects/partials/projects_list.html").render({"request": request, "projects": projects, "current_user": current_user})
@@ -32,9 +33,12 @@ async def create(request: Request, name: Annotated[str, Form()], current_user: U
     db.add(new_projects)
     db.commit()
     db.refresh(new_projects)
+    user_project = UserProject(user_id = current_user.id, project_id = new_projects.id)
+    db.add(user_project)
+    db.commit()
     is_htmx = request.headers.get("HX-Request") == "true"
     if is_htmx:
-        projects = db.query(Project).order_by(Project.name.desc()).all()
+        projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).all()
         content = templates.get_template("projects/partials/projects_list.html").render({"projects": projects, "request": request})
         return HTMLResponse(content=content)
     else:
@@ -52,7 +56,7 @@ async def new(request: Request, current_user: User = Depends(get_current_active_
 @project.post("/{project_name}/update")
 async def update(project_name: str, name: Annotated[str, Form()], request: Request, description: Annotated[Optional[str], Form()] = None, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     update_data = ProjectUpdate(name = name, description = description)
-    projects = db.query(Project).filter(Project.name == project_name).first()
+    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).all()
     if not projects:
         raise HTTPException(status_code=404, detail="查無專案。")
     existing_project = db.query(Project).filter(Project.name == update_data.name, Project.id != projects.id).first()
@@ -74,7 +78,7 @@ async def update(project_name: str, name: Annotated[str, Form()], request: Reque
 
 @project.get("/{project_name}")
 async def show(request: Request, project_name: str, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
-    projects = db.query(Project).filter(Project.name == project_name).first()
+    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).all()
     if not projects:
         raise HTTPException(status_code=404, detail="查無專案。")
     lanes = db.query(Lane).filter(Lane.project_id == projects.id).all()
@@ -87,7 +91,7 @@ async def show(request: Request, project_name: str, current_user: User = Depends
 
 @project.get("/{project_name}/edit")
 async def edit(request: Request, project_name: str, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
-    projects = db.query(Project).filter(Project.name == project_name).first()
+    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).all()
     if not projects:
         raise HTTPException(status_code=404, detail="查無專案名稱。")
     is_htmx = request.headers.get("HX-Request") == "true"
@@ -99,7 +103,7 @@ async def edit(request: Request, project_name: str, current_user: User = Depends
 
 @project.post("/{project_name}/delete")
 async def delete(project_name: str, request: Request, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
-    projects = db.query(Project).filter(Project.name == project_name).first()
+    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).all()
     if projects:
         db.delete(projects)
         db.commit()
