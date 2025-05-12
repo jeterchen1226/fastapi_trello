@@ -28,6 +28,14 @@ async def initialize_positions(request: Request, current_user: User = Depends(ge
         lane.position = i
         db.add(lane)
     db.commit()
+    
+    is_htmx = request.headers.get("HX-Request") == "true"
+    if is_htmx:
+        message_data = {
+            "message": "所有泳道位置已初始化成功。",
+            "type": "success",
+        }
+        return HTMLResponse(content=f"""<div id="message-data" style="display:none;" data-message="{message_data['message']}" data-type="{message_data['type']}"></div>""")
     return {"message": "所有泳道位置已初始化成功。"}
 
 @lane.get("/")
@@ -79,10 +87,21 @@ async def create(request: Request, name: Annotated[str, Form()], project_id: Ann
             lanes = db.query(Lane).options(selectinload(Lane.project), selectinload(Lane.tasks)).filter(Lane.project_id == project_id).order_by(Lane.position).all()
             project = db.query(Project).filter(Project.id == project_id).first()
             content = templates.get_template("lanes/partials/lanes_list.html").render({"request": request, "lanes": lanes, "project": project, "current_user": current_user})
+            message_data = {
+                "message": f"泳道 {name} 建立成功。",
+                "type": "success",
+            }
+            content_message = f"""<div id="message-data" style="display:none;" data-message="{message_data['message']}" data-type="{message_data['type']}"></div>{content}"""
+            return HTMLResponse(content=content_message)
         else:
             lanes = db.query(Lane).options(selectinload(Lane.project), selectinload(Lane.tasks)).order_by(Lane.position).all()
             content = templates.get_template("lanes/partials/lanes_list.html").render({"request": request, "lanes": lanes, "current_user": current_user})
-        return HTMLResponse(content=content)
+            message_data = {
+                "message": f"泳道 {name} 建立成功。",
+                "type": "success",
+            }
+            content_message = f"""<div id="message-data" style="display:none;" data-message="{message_data['message']}" data-type="{message_data['type']}"></div>{content}"""
+            return HTMLResponse(content=content_message)
     else:
         if project_id:
             return RedirectResponse(url=f"/lanes?project_id={project_id}", status_code=status.HTTP_302_FOUND)
@@ -111,7 +130,13 @@ async def update(lane_id: int, name: Annotated[str, Form()], request: Request, c
     existing_lane = db.query(Lane).filter(Lane.name == update_data.name, Lane.id != lane.id, Lane.project_id == project_id).first()
     if existing_lane:
         if request.headers.get("HX-Request") == "true":
-            return HTMLResponse(content=f"""<div id="error-message" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">該專案中已有相同名稱的泳道</div>""",status_code=400)
+            error_content = f"""<div id="error-message" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">已有同名泳道</div>"""
+            message_data = {
+                "message": "已經有相同泳道存在。",
+                "type": "error",
+            }
+            content_message = f"""<div id="message-data" style="display:none;" data-message="{message_data['message']}" data-type="{message_data['type']}"></div>{error_content}"""
+            return HTMLResponse(content=content_message, status_code=400)
         else:
             raise HTTPException(status_code=400, detail="該專案中已有相同名稱的泳道。")
     lane.name = update_data.name
@@ -125,7 +150,13 @@ async def update(lane_id: int, name: Annotated[str, Form()], request: Request, c
         else:
             lanes = db.query(Lane).options(selectinload(Lane.project), selectinload(Lane.tasks)).order_by(Lane.position).all()
             content = templates.get_template("lanes/partials/lanes_list.html").render({"request": request, "lanes": lanes, "current_user": current_user})
-        return HTMLResponse(content=content)
+        
+        message_data = {
+            "message": f"泳道 {name} 更新成功。",
+            "type": "success",
+        }
+        content_message = f"""<div id="message-data" style="display:none;" data-message="{message_data['message']}" data-type="{message_data['type']}"></div>{content}"""
+        return HTMLResponse(content=content_message)
     else:
         if project_id:
             return RedirectResponse(url=f"/lanes?project_id={project_id}", status_code=status.HTTP_302_FOUND)    
@@ -165,6 +196,7 @@ async def delete(lane_id: int, request: Request, current_user: User = Depends(ge
     if not lane:
         raise HTTPException(status_code=404, detail="查無泳道。")    
     project_id = lane.project_id
+    lane_name = lane.name
     db.delete(lane)
     db.commit()
     is_htmx = request.headers.get("HX-Request") == "true"
@@ -176,7 +208,13 @@ async def delete(lane_id: int, request: Request, current_user: User = Depends(ge
         else:
             lanes = db.query(Lane).options(selectinload(Lane.project), selectinload(Lane.tasks)).order_by(Lane.position).all()
             content = templates.get_template("lanes/partials/lanes_list.html").render({"request": request, "lanes": lanes, "current_user": current_user})
-        return HTMLResponse(content=content)
+        
+        message_data = {
+            "message": f"泳道 {lane_name} 刪除成功。",
+            "type": "success",
+        }
+        content_message = f"""<div id="message-data" style="display:none;" data-message="{message_data['message']}" data-type="{message_data['type']}"></div>{content}"""
+        return HTMLResponse(content=content_message)
     else:
         if project_id:
             return RedirectResponse(url=f"/lanes?project_id={project_id}", status_code=status.HTTP_302_FOUND)
