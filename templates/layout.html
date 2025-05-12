@@ -8,6 +8,12 @@
     <script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- 導入的 Javascript -->
+    <script src="/static/js/sweet_alert.js"></script>
+    <script src="/static/js/project_actions.js"></script>
+    <script src="/static/js/htmx_events.js"></script>
     {% block head %}{% endblock %}
 </head>
 <body class="flex flex-col h-full bg-gray-100">
@@ -19,11 +25,11 @@
                     <div class="flex items-center space-x-4">
                         <span class="text-gray-600">您好，{{ current_user.name }}</span>
                         <form action="/users/logout" method="GET" class="inline">
-                            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md transition duration-200">登出</button>
+                            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md">登出</button>
                         </form>
                     </div>
                 {% elif not request.path.startswith("/users/login") and not request.path.startswith("/users/register") %}
-                    <a href="/users/login" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md transition duration-200">登入</a>
+                    <a href="/users/login" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md">登入</a>
                 {% endif %}
             </div>
         </div>

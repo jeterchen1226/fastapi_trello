@@ -26,9 +26,19 @@ async def index(request: Request, current_user: User = Depends(get_current_activ
 @project.post("/")
 async def create(request: Request, name: Annotated[str, Form()], current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     create_data = ProjectCreate(name = name)
-    projects = db.query(Project).filter(Project.name == create_data.name).first()
-    if projects:
-        raise HTTPException(status_code=400, detail="該專案名稱已被使用。")
+    project = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id, Project.name == create_data.name).first()
+    is_htmx = request.headers.get("HX-Request") == "true"
+    if project:
+        if is_htmx:
+            error_content = f"""<div id="error-message" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">您已有同名專案</div>"""
+            message_data = {
+                "message": "您已經建立過相同名稱的專案。",
+                "type": "error",
+            }
+            content_message = f"""<div id="message-data" style="display:none;" data-message="{message_data['message']}" data-type="{message_data['type']}"></div>{error_content}"""
+            return HTMLResponse(content=content_message, status_code=400)
+        else:
+            raise HTTPException(status_code=400, detail="您已經建立過相同名稱的專案。")
     new_projects = Project(name = create_data.name)
     db.add(new_projects)
     db.commit()
@@ -39,8 +49,13 @@ async def create(request: Request, name: Annotated[str, Form()], current_user: U
     is_htmx = request.headers.get("HX-Request") == "true"
     if is_htmx:
         projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).all()
-        content = templates.get_template("projects/partials/projects_list.html").render({"projects": projects, "request": request})
-        return HTMLResponse(content=content)
+        content = templates.get_template("projects/partials/projects_list.html").render({"projects": projects, "request": request, "current_user": current_user})
+        message_data = {
+            "message": f"專案 {name} 建立成功。",
+            "type": "success",
+        }
+        content_message = f"""<div id="message-data" style="display:none;" data-message="{message_data['message']}" data-type="{message_data['type']}"></div>{content}"""
+        return HTMLResponse(content=content_message)
     else:
         return RedirectResponse(url="/projects", status_code=status.HTTP_302_FOUND)
 
@@ -56,29 +71,45 @@ async def new(request: Request, current_user: User = Depends(get_current_active_
 @project.post("/{project_name}/update")
 async def update(project_name: str, name: Annotated[str, Form()], request: Request, description: Annotated[Optional[str], Form()] = None, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     update_data = ProjectUpdate(name = name, description = description)
-    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).all()
-    if not projects:
+    project = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id, Project.name == project_name).first()
+    if not project:
         raise HTTPException(status_code=404, detail="查無專案。")
-    existing_project = db.query(Project).filter(Project.name == update_data.name, Project.id != projects.id).first()
+    existing_project = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id, Project.name == update_data.name, Project.id != project.id).first()
     if existing_project:
         if request.headers.get("HX-Request") == "true":
-            return HTMLResponse(content=f"""<div id="error-message" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">該專案名稱已被使用</div>""",status_code=400)
+            error_content = f"""<div id="error-message" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">您已有同名專案</div>"""
+            message_data = {
+                "message": "您已經建立過相同名稱的專案。",
+                "type": "error",
+            }
+            content_message = f"""<div id="message-data" style="display:none;" data-message="{message_data['message']}" data-type="{message_data['type']}"></div>{error_content}"""
+            return HTMLResponse(content=content_message, status_code=400)
         else:
-            raise HTTPException(status_code=400, detail="該專案名稱已被使用。")
-    projects.name = update_data.name
-    if description is not None:
-        projects.description = update_data.description
-    db.commit()
-    is_htmx = request.headers.get("HX-Request") == "true"
-    if is_htmx:
-        content = templates.get_template("projects/partials/projects_show.html").render({"request": request, "projects": projects, "current_user": current_user})
-        return HTMLResponse(content=content)
-    else:
-        return RedirectResponse(url="/projects", status_code=status.HTTP_302_FOUND)
+            raise HTTPException(status_code=400, detail="您已經建立過相同名稱的專案。")
+    try:
+        project.name = update_data.name
+        if description is not None:
+            project.description = update_data.description
+        db.commit()
+        is_htmx = request.headers.get("HX-Request") == "true"
+        if is_htmx:
+            content = templates.get_template("projects/partials/projects_show.html").render({"request": request, "projects": project, "current_user": current_user})
+            message_data = {
+                "message": "專案更新成功。",
+                "type": "success",
+            }
+            content_message = f"""<div id="message-data" style="display:none;" data-message="{message_data['message']}" data-type="{message_data['type']}"></div>{content}"""
+            return HTMLResponse(content=content_message)
+        else:
+            return RedirectResponse(url="/projects", status_code=status.HTTP_302_FOUND)
+    except Exception as e:
+        db.rollback()
+        print(f"更新專案時發生錯誤: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"更新專案時發生錯誤: {str(e)}")
 
 @project.get("/{project_name}")
 async def show(request: Request, project_name: str, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
-    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).all()
+    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).first()
     if not projects:
         raise HTTPException(status_code=404, detail="查無專案。")
     lanes = db.query(Lane).filter(Lane.project_id == projects.id).all()
@@ -91,7 +122,7 @@ async def show(request: Request, project_name: str, current_user: User = Depends
 
 @project.get("/{project_name}/edit")
 async def edit(request: Request, project_name: str, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
-    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).all()
+    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).first()
     if not projects:
         raise HTTPException(status_code=404, detail="查無專案名稱。")
     is_htmx = request.headers.get("HX-Request") == "true"
@@ -103,16 +134,27 @@ async def edit(request: Request, project_name: str, current_user: User = Depends
 
 @project.post("/{project_name}/delete")
 async def delete(project_name: str, request: Request, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
-    projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).all()
-    if projects:
-        db.delete(projects)
-        db.commit()
-        is_htmx = request.headers.get("HX-Request") == "true"
-        if is_htmx:
-            projects = db.query(Project).order_by(Project.name.desc()).all()
-            content = templates.get_template("projects/partials/projects_list.html").render({"projects": projects, "request": request})
-            return HTMLResponse(content=content)
-        else:
-            return RedirectResponse(url="/projects", status_code=status.HTTP_302_FOUND)
+    proj = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id, Project.name == project_name).first()
+    if proj:
+        try:
+            db.query(UserProject).filter(UserProject.project_id == proj.id).delete()
+            db.delete(proj)
+            db.commit()
+            is_htmx = request.headers.get("HX-Request") == "true"
+            if is_htmx:
+                projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).all()
+                content = templates.get_template("projects/partials/projects_list.html").render({"projects": projects, "request": request, "current_user": current_user})
+                message_data = {
+                    "message": f"專案 {project_name} 已刪除成功。",
+                    "type": "success",
+                }
+                content_message = f"""<div id="message-data" style="display:none;" data-message="{message_data['message']}" data-type="{message_data['type']}"></div>{content}"""
+                return HTMLResponse(content=content_message)
+            else:
+                return RedirectResponse(url="/projects", status_code=status.HTTP_302_FOUND)
+        except Exception as e:
+            db.rollback()
+            print(f"刪除專案時發生錯誤: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"刪除專案時發生錯誤: {str(e)}")
     else:
         raise HTTPException(status_code=404, detail="查無專案。")
