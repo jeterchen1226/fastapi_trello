@@ -31,7 +31,7 @@
 - 後端：`Python3`、`FastAPI`
 - 版本控制：`Git`
 - 資料庫：`PostgreSQL`
-- 其他：`SQLAlchemy`、`Alembic`
+- 其他：`SQLAlchemy`、`Alembic`、`SweetAlert`
 
 ## 其他
 

@@ -1,5 +1,5 @@
 <div class="mb-6">
-    <button hx-get="/projects/new" hx-target="#new-project-form" hx-swap="innerHTML" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md transition duration-200">新增專案</button>
+    <button hx-get="/projects/new" hx-target="#new-project-form" hx-swap="innerHTML" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md">新增專案</button>
     <div id="new-project-form"></div>
 </div>
 <div id="project-list">
@@ -21,7 +21,7 @@
                         <button hx-get="/projects/{{ project.name }}" hx-target="#main-content" hx-push-url="true" class="text-blue-500 hover:text-blue-700">查看</button>
                         <button hx-get="/projects/{{ project.name }}/edit" hx-target="#main-content" hx-push-url="true" class="text-blue-500 hover:text-blue-700">編輯</button>
                         <form hx-post="/projects/{{ project.name }}/delete" hx-target="#main-content" hx-swap="innerHTML" class="inline">
-                            <button type="submit" onclick="return confirm('確定要刪除嗎？')" class="text-red-500 hover:text-red-700">刪除</button>
+                            <button type="button" onclick="confirmDelete('{{ project.name }}')" class="text-red-500 hover:text-red-700">刪除</button>
                         </form>
                     </div>
                 </td>
