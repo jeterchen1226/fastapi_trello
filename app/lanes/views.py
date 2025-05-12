@@ -150,7 +150,6 @@ async def update(lane_id: int, name: Annotated[str, Form()], request: Request, c
         else:
             lanes = db.query(Lane).options(selectinload(Lane.project), selectinload(Lane.tasks)).order_by(Lane.position).all()
             content = templates.get_template("lanes/partials/lanes_list.html").render({"request": request, "lanes": lanes, "current_user": current_user})
-        
         message_data = {
             "message": f"泳道 {name} 更新成功。",
             "type": "success",
@@ -208,7 +207,6 @@ async def delete(lane_id: int, request: Request, current_user: User = Depends(ge
         else:
             lanes = db.query(Lane).options(selectinload(Lane.project), selectinload(Lane.tasks)).order_by(Lane.position).all()
             content = templates.get_template("lanes/partials/lanes_list.html").render({"request": request, "lanes": lanes, "current_user": current_user})
-        
         message_data = {
             "message": f"泳道 {lane_name} 刪除成功。",
             "type": "success",
