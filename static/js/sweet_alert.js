@@ -3,7 +3,7 @@ function showSuccessAlert (message) {
             title: "成功",
             text: message,
             icon: "success",
-            confirmButtonText: "確定"
+            draggable: true
         });
     }
     function showErrorAlert (message) {
@@ -11,7 +11,7 @@ function showSuccessAlert (message) {
             title: "錯誤",
             text: message,
             icon: "error",
-            confirmButtonText: "確定"
+            draggable: true
         });
     }
     function showConfirmAlert(title, text, callback) {

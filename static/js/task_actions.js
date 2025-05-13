@@ -28,17 +28,6 @@ function checkForMessages() {
     }
 }
 
-function confirmDelete(laneId, laneName) {
-    showConfirmAlert("確認刪除", `確定要刪除「${laneName}」該泳道嗎？`,
-        function() {
-            htmx.ajax("POST", `/lanes/${laneId}/delete`, {
-                target: "#main-content",
-                swap: "innerHTML"
-            });
-        }
-    );
-}
-
 function confirmDeleteTask(taskId, taskName) {
     showConfirmAlert("確認刪除", `確定要刪除「${taskName}」該任務嗎？`,
         function() {
