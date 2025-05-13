@@ -2,6 +2,10 @@
 
 {% block title %}專案列表{% endblock %}
 
+{% block head %}
+    <script src="/static/js/auth_alerts.js"></script>
+{% endblock %}
+
 {% block content %}
 {% include "projects/partials/projects_list.html" %}
 {% endblock %}

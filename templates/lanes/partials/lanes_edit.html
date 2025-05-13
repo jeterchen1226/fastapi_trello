@@ -7,7 +7,7 @@
                 <input type="text" name="name" id="name" x-model="lane.name" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
             </div>
             <div class="flex justify-between">
-                <a href="{% if lanes.project_id %}/lanes?project_id={{ lanes.project_id }}{% else %}/lanes{% endif %}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md transition duration-200">返回</a>
+                <a href="{% if lanes.project_id %}/lanes?project_id={{ lanes.project_id }}{% else %}/lanes{% endif %}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md">返回</a>
                 <button type="submit" :disabled="submitting" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md flex items-center space-x-1">
                     <span x-show="!submitting">更新</span>
                 </button>

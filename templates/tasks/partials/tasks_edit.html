@@ -6,7 +6,7 @@
         </div>
         
         <div class="flex justify-end space-x-2">
-            <button type="button" hx-get="/tasks/{{ task.id }}" hx-target="#task-{{ task.id }}" hx-swap="outerHTML" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded-md">取消</button>
+            <button type="button" hx-get="{{ return_url }}" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="true" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded-md">取消</button>
             <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md">儲存</button>
         </div>
     </form>
