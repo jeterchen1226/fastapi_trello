@@ -14,7 +14,7 @@ document.addEventListener("htmx:afterSwap", function (event) {
     }
 });
 
-function confirmDelete (laneId, laneName) {
+function confirmDeleteLane (laneId, laneName) {
     showConfirmAlert("確認刪除", `確定要刪除「${laneName}」該泳道嗎？`,
         function() {
             htmx.ajax("POST", `/lanes/${laneId}/delete`, {
