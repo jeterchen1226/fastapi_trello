@@ -150,12 +150,14 @@ async def edit(request: Request, task_id: int, current_user: User = Depends(get_
     if not task_obj:
         raise HTTPException(status_code=404, detail="查無任務。")
     project_id = None
+    return_url = "/lanes"
     if task_obj.lane and task_obj.lane.project_id:
         project_id = task_obj.lane.project_id
+        return_url = f"/lanes?project_id={project_id}"
     lanes = db.query(Lane).all()
     is_htmx = request.headers.get("HX-Request") == "true"
     if is_htmx:
-        content = templates.get_template("tasks/partials/tasks_edit.html").render({"request": request, "task": task_obj, "lanes": lanes, "project_id": project_id, "current_user": current_user})
+        content = templates.get_template("tasks/partials/tasks_edit.html").render({"request": request, "task": task_obj, "lanes": lanes, "project_id": project_id, "current_user": current_user, "return_url": return_url})
         return HTMLResponse(content=content)
     else:
         return templates.TemplateResponse("tasks/edit.html", {"request": request, "task": task_obj, "lanes": lanes, "project_id": project_id, "current_user": current_user})

@@ -16,7 +16,7 @@
     {% endif %}
 </div>
 
-<div id="lanes-container" class="flex flex-wrap gap-4">
+<div id="lanes-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
     {% for lane in lanes %}
         <div class="bg-white rounded-lg shadow-md p-4 w-64">
             <div class="flex justify-between items-center mb-3">
@@ -24,7 +24,7 @@
                 <div class="flex space-x-2">
                     <button hx-get="/lanes/{{ lane.id }}/edit" hx-target="#main-content" hx-push-url="true" class="text-blue-500 hover:text-blue-700">編輯</button>
                     <form hx-post="/lanes/{{ lane.id }}/delete" hx-target="#main-content" hx-swap="innerHTML" class="inline">
-                        <button onclick="confirmDeleteLane('{{lane.name}}')" class="text-red-500 hover:text-red-700">刪除</button>
+                        <button type="button" onclick="confirmDeleteLane('{{ lane.id }}', '{{ lane.name }}')" class="text-red-500 hover:text-red-700">刪除</button>
                     </form>
                 </div>
             </div>
@@ -43,9 +43,7 @@
                                     <span>{{ task.name }}</span>
                                     <div class="flex space-x-1">
                                         <button hx-get="/tasks/{{ task.id }}/edit" hx-target="#main-content" hx-push-url="true" class="text-xs text-blue-500 hover:text-blue-700">編輯</button>
-                                        <form hx-post="/tasks/{{ task.id }}/delete" hx-target="#main-content" hx-swap="innerHTML" class="inline">
-                                            <button type="submit" onclick="return confirm('確定要刪除嗎？')" class="text-xs text-red-500 hover:text-red-700">刪除</button>
-                                        </form>
+                                        <button hx-post="/lanes/{{ lane.id }}/delete" hx-target="#main-content" hx-swap="innerHTML" onclick="confirmDeleteLane('{{ lane.id }}', '{{ lane.name }}')" class="text-red-500 hover:text-red-700">刪除</button>
                                     </div>
                                 </div>
                             </div>

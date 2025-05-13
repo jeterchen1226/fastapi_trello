@@ -17,7 +17,7 @@
         </div>
     {% endif %}
     <div class="flex justify-end space-x-3">
-        <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md" hx-get="/tasks/empty" hx-target="#new-task-form-{{ lane.id }}" hx-swap="innerHTML">取消</button>
+        <button type="button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md" hx-get="/tasks/empty" hx-target="#new-task-form-{{ lane.id }}" hx-swap="innerHTML">取消</button>
         <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md">儲存</button>
     </div>
 </form>
