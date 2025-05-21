@@ -18,6 +18,62 @@ task = APIRouter()
 async def empty(request: Request):
     return HTMLResponse(content="")
 
+@task.patch("/{task_id}/position")
+async def update_position(task_id: int, request: Request, new_index: Annotated[int, Form()], target_lane_id: Annotated[Optional[int], Form()] = None, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    new_index = int(new_index)
+    if target_lane_id and target_lane_id != "":
+        target_lane_id = int(target_lane_id)
+    task_obj = db.query(Task).filter(Task.id == task_id).first()
+    if not task_obj:
+        raise HTTPException(status_code=404, detail="查無任務。")
+    old_lane_id = task_obj.lane_id
+    try:
+        # 如果目標泳道的id和當前泳道id不同，任務會被移動到新的泳道
+        if target_lane_id and target_lane_id != old_lane_id:
+            # 驗證新泳道是否存在
+            target_lane = db.query(Lane).filter(Lane.id == target_lane_id).first()
+            if not target_lane:
+                raise HTTPException(status_code=404, detail="目標泳道不存在。")
+            # 更新舊泳道中的任務位置
+            tasks_in_old_lane = db.query(Task).filter(Task.lane_id == old_lane_id, Task.id != task_id).order_by(Task.position).all()
+            # 重新排序舊泳道中的任務
+            for i, t in enumerate(tasks_in_old_lane, start=1):
+                t.position = i
+                db.add(t)
+            # 取得新泳道中的任務
+            tasks_in_new_lane = db.query(Task).filter(Task.lane_id == target_lane_id).order_by(Task.position).all()
+            # 在新位置塞入任務
+            for i, t in enumerate(tasks_in_new_lane):
+                if i >= new_index:
+                    t.position = i + 1
+                    db.add(t)
+            # 更新任務的泳道和位置
+            task_obj.lane_id = target_lane_id
+            task_obj.position = new_index
+        else:
+            # 在同一泳道內移動
+            if old_lane_id:
+                tasks = db.query(Task).filter(Task.lane_id == old_lane_id, Task.id != task_id).order_by(Task.position).all()
+                # 塞入任務到新位置並更新其他任務位置
+                tasks_to_update = []
+                current_pos = 1
+                for i, t in enumerate(tasks):
+                    if current_pos == new_index:
+                        current_pos += 1
+                    t.position = current_pos
+                    tasks_to_update.append(t)
+                    current_pos += 1
+                for t in tasks_to_update:
+                    db.add(t)
+                task_obj.position = new_index
+        db.add(task_obj)
+        db.commit()
+        return {"success": True}
+    except Exception as e:
+        db.rollback()
+        print(f"更新任務位置時出錯: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"更新任務位置失敗: {str(e)}")
+
 @task.get("/")
 async def index(request: Request, lane_id: Optional[int] = Query(None), current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     if lane_id:
