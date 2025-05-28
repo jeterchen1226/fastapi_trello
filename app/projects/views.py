@@ -14,6 +14,144 @@ from utils.flash import get_flash_message
 
 project = APIRouter()
 
+# 專案成員管理
+@project.get("/{project_name}/members")
+async def members(request: Request, project_name: str, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    proj = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id, Project.name == project_name).first()
+    if not proj:
+        raise HTTPException(status_code=404, detail="查無專案。")
+    # 取得專案成員
+    members = db.query(User).join(UserProject).filter(UserProject.project_id == proj.id).all()
+    is_htmx = request.headers.get("HX-Request") == "true"
+    if is_htmx:
+        content = templates.get_template("projects/partials/members_manage.html").render({
+            "request": request, 
+            "project": proj, 
+            "members": members,
+            "current_user": current_user
+        })
+        return HTMLResponse(content=content)
+    else:
+        return templates.TemplateResponse("projects/members.html", {
+            "request": request, 
+            "project": proj, 
+            "members": members,
+            "current_user": current_user
+        })
+
+# 直接加入成員
+@project.post("/{project_name}/add_member")
+async def add_member(project_name: str, member_email: Annotated[str, Form()], request: Request, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    proj = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id, Project.name == project_name).first()
+    if not proj:
+        raise HTTPException(status_code=404, detail="查無專案。")
+    member_user = db.query(User).filter(User.email == member_email).first()
+    if not member_user:
+        is_htmx = request.headers.get("HX-Request") == "true"
+        if is_htmx:
+            members = db.query(User).join(UserProject).filter(UserProject.project_id == proj.id).all()
+            content = templates.get_template("projects/partials/members_manage.html").render({
+                "request": request, 
+                "project": proj, 
+                "members": members,
+                "current_user": current_user
+            })
+            error_message = f"""<div id="message-data" style="display:none;" data-message="找不到此 email 的用戶：{member_email}" data-type="error"></div>"""
+            return HTMLResponse(content=error_message + content, status_code=400)
+        else:
+            raise HTTPException(status_code=400, detail="找不到此 email 的使用者。")
+    # 檢查是否已經是成員
+    existing_member = db.query(UserProject).filter(UserProject.user_id == member_user.id, UserProject.project_id == proj.id).first()
+    if existing_member:
+        is_htmx = request.headers.get("HX-Request") == "true"
+        if is_htmx:
+            members = db.query(User).join(UserProject).filter(UserProject.project_id == proj.id).all()
+            content = templates.get_template("projects/partials/members_manage.html").render({
+                "request": request, 
+                "project": proj, 
+                "members": members,
+                "current_user": current_user
+            })
+            error_message = f"""<div id="message-data" style="display:none;" data-message="該用戶已是專案成員" data-type="error"></div>"""
+            return HTMLResponse(content=error_message + content, status_code=400)
+        else:
+            raise HTTPException(status_code=400, detail="該使用者已是專案成員。")
+    # 不能加入自己
+    if member_user.id == current_user.id:
+        is_htmx = request.headers.get("HX-Request") == "true"
+        if is_htmx:
+            members = db.query(User).join(UserProject).filter(UserProject.project_id == proj.id).all()
+            content = templates.get_template("projects/partials/members_manage.html").render({
+                "request": request, 
+                "project": proj, 
+                "members": members,
+                "current_user": current_user
+            })
+            error_message = f"""<div id="message-data" style="display:none;" data-message="不能加入自己" data-type="error"></div>"""
+            return HTMLResponse(content=error_message + content, status_code=400)
+        else:
+            raise HTTPException(status_code=400, detail="不能加入自己。")
+    # 直接加入專案
+    user_project = UserProject(user_id=member_user.id, project_id=proj.id)
+    db.add(user_project)
+    db.commit()
+    
+    is_htmx = request.headers.get("HX-Request") == "true"
+    if is_htmx:
+        members = db.query(User).join(UserProject).filter(UserProject.project_id == proj.id).all()
+        content = templates.get_template("projects/partials/members_manage.html").render({
+            "request": request, 
+            "project": proj, 
+            "members": members,
+            "current_user": current_user
+        })
+        success_message = f"""<div id="message-data" style="display:none;" data-message="已成功將 {member_user.name} ({member_email}) 加入專案。" data-type="success"></div>"""
+        return HTMLResponse(content=success_message + content)
+    else:
+        return RedirectResponse(url=f"/projects/{project_name}/members", status_code=status.HTTP_302_FOUND)
+
+# 刪除成員
+@project.post("/{project_name}/remove_member")
+async def remove_member(project_name: str, member_id: Annotated[str, Form()], request: Request, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    proj = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id, Project.name == project_name).first()
+    if not proj:
+        raise HTTPException(status_code=404, detail="查無專案。")
+    if int(member_id) == current_user.id:
+        is_htmx = request.headers.get("HX-Request") == "true"
+        if is_htmx:
+            members = db.query(User).join(UserProject).filter(UserProject.project_id == proj.id).all()
+            content = templates.get_template("projects/partials/members_manage.html").render({
+                "request": request, 
+                "project": proj, 
+                "members": members,
+                "current_user": current_user
+            })
+            error_message = f"""<div id="message-data" style="display:none;" data-message="不能移除自己" data-type="error"></div>"""
+            return HTMLResponse(content=error_message + content, status_code=400)
+        else:
+            raise HTTPException(status_code=400, detail="不能移除自己。")
+    member_to_remove = db.query(User).filter(User.id == int(member_id)).first()
+    if not member_to_remove:
+        raise HTTPException(status_code=404, detail="查無該成員。")
+    user_project = db.query(UserProject).filter(UserProject.user_id == int(member_id), UserProject.project_id == proj.id).first()
+    if not user_project:
+        raise HTTPException(status_code=404, detail="該使用者不是專案成員。")
+    db.delete(user_project)
+    db.commit()
+    is_htmx = request.headers.get("HX-Request") == "true"
+    if is_htmx:
+        members = db.query(User).join(UserProject).filter(UserProject.project_id == proj.id).all()
+        content = templates.get_template("projects/partials/members_manage.html").render({
+            "request": request, 
+            "project": proj, 
+            "members": members,
+            "current_user": current_user
+        })
+        success_message = f"""<div id="message-data" style="display:none;" data-message="已成功移除 {member_to_remove.name}" data-type="success"></div>"""
+        return HTMLResponse(content=success_message + content)
+    else:
+        return RedirectResponse(url=f"/projects/{project_name}/members", status_code=status.HTTP_302_FOUND)
+
 @project.get("/")
 async def index(request: Request, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     projects = db.query(Project).join(UserProject, UserProject.project_id == Project.id).filter(UserProject.user_id == current_user.id).order_by(Project.name.desc()).all()

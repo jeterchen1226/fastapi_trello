@@ -20,6 +20,7 @@
                     <div class="flex space-x-2">
                         <button hx-get="/projects/{{ project.name }}" hx-target="#main-content" hx-push-url="true" class="text-blue-500 hover:text-blue-700">查看</button>
                         <button hx-get="/projects/{{ project.name }}/edit" hx-target="#main-content" hx-push-url="true" class="text-blue-500 hover:text-blue-700">編輯</button>
+                        <button hx-get="/projects/{{ project.name }}/members" hx-target="#main-content" hx-push-url="true" class="text-green-500 hover:text-green-700">成員</button>
                         <form hx-post="/projects/{{ project.name }}/delete" hx-target="#main-content" hx-swap="innerHTML" class="inline">
                             <button type="button" onclick="confirmDeleteProject('{{ project.name }}')" class="text-red-500 hover:text-red-700">刪除</button>
                         </form>
