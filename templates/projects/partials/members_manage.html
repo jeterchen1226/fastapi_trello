@@ -20,7 +20,8 @@
                 <div class="flex items-center gap-2">
                     <span class="text-sm text-green-600">專案成員</span>
                     {% if member.id != current_user.id %}
-                    <button hx-post="/projects/{{ project.name }}/remove_member" hx-vals='{"member_id": "{{ member.id }}"}' hx-target="#members-content" hx-swap="outerHTML" hx-confirm="確定要移除 {{ member.name }} 嗎？" class="text-red-500 hover:text-red-700 text-sm px-2 py-1 border border-red-500 rounded">移除</button>
+                        <button type="button" onclick="showConfirmAlert('確認移除成員', `確定要將 {{ member.name }} 從專案中移除嗎？`, function() { document.querySelector('#remove-member-{{ member.id }}').click(); })" class="text-red-500 hover:text-red-700 text-sm px-2 py-1 border border-red-500 rounded">移除</button>
+                        <button id="remove-member-{{ member.id }}" hx-post="/projects/{{ project.name }}/remove_member" hx-vals='{"member_id": "{{ member.id }}"}' hx-target="#members-content" hx-swap="outerHTML" style="display: none;"></button>
                     {% endif %}
                 </div>
             </div>
